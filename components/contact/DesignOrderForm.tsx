@@ -4,14 +4,15 @@ import React, { ChangeEvent, FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 import './style.css'
 
+
 interface FormData {
   designType: string
   customDesignType: string
   designText: string
   color: string
   designElements: string
-  width: number
-  height: number
+  width: number | null
+  height: number | null
   fileSize: string
   additionalInfo: string
   telegramUsername: string
@@ -34,8 +35,8 @@ const DesignOrderForm: React.FC = () => {
     designText: '',
     color: '',
     designElements: '',
-    width: 0,
-    height: 0,
+    width: null,
+    height: null,
     fileSize: '',
     additionalInfo: '',
     telegramUsername: '',
@@ -48,7 +49,7 @@ const DesignOrderForm: React.FC = () => {
   const [chatIdError, setChatIdError] = useState<string | null>(null)
 
   const BOT_TOKEN = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN
-  const CHAT_ID = chatId
+  const CHAT_ID = 1832735702
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`
 
   // chat id
@@ -124,20 +125,31 @@ const DesignOrderForm: React.FC = () => {
 
   const sendToTelegramBot = async () => {
     const message = `
-      Новый заказ дизайна:
-      Тип дизайна: ${
-        formData.designType === 'Другое'
-          ? formData.customDesignType
-          : formData.designType
-      }
-      Текст: ${formData.designText}
-      Цвет: ${formData.color}
-      Элементы дизайна: ${formData.designElements}
-      Размер: ${formData.width}x${formData.height}
-      Размер файла: ${formData.fileSize || 'Не указано'}
-      Доп. информация: ${formData.additionalInfo}
-      Telegram: ${formData.telegramUsername}
-    `
+    🉐НОВЫЙ ЗАКАЗ ДИЗАЙНА🉐:
+
+
+    ТИП ДИЗАЙНА: ${
+      formData.designType === 'Другое'
+        ? formData.customDesignType
+        : formData.designType
+    }
+   
+    ТЕКСТ: ${formData.designText}
+    
+    ЦВЕТ: ${formData.color}
+    
+    ЭЛЕМЕНТЫ ДИЗАЙНА: ${formData.designElements}
+    
+    РАЗМЕР: ${formData.width}x${formData.height}
+    
+    РАЗМЕР ФАЙЛА: ${formData.fileSize || 'Не указано'}
+    
+    ДОП ИНФОРМАЦИЯ: ${formData.additionalInfo}
+    
+    Telegram: ${formData.telegramUsername}
+  `
+    
+
 
     try {
       const response = await fetch(
@@ -169,6 +181,18 @@ const DesignOrderForm: React.FC = () => {
     e.preventDefault()
     if (validateForm()) {
       sendToTelegramBot()
+      setFormData({
+        designType: '',
+        customDesignType: '',
+        designText: '',
+        color: '',
+        designElements: '',
+        width: null,
+        height: null,
+        fileSize: '',
+        additionalInfo: '',
+        telegramUsername: '',
+      })
     } else {
       toast.error('Пожалуйста, заполните все обязательные поля.')
     }
@@ -177,20 +201,20 @@ const DesignOrderForm: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl"
+      className="max-w-full mx-auto mt-10 p-6 bg-[#191919] rounded-lg shadow-xl"
     >
-      <h2 className="text-2xl font-bold mb-6">Форма заказа дизайна</h2>
+      <h2 className="text-2xl font-bold mb-6 text-white">Форма заказа дизайна</h2>
 
       <div className="dropdown mb-4 relative">
         <button
           type="button"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="w-full p-2 border rounded bg-white text-left"
+          className="w-full p-2 border rounded text-left bg-[#222222] text-white border-none"
         >
           {formData.designType || 'Выберите тип дизайна'}
         </button>
         {isDropdownOpen && (
-          <div className="dropdown-content absolute left-0 right-0 bg-white border rounded">
+          <div className="dropdown-content absolute left-0 right-0 bg-[#222222] text-white border-none border rounded">
             {designTypes.map((type, index) => (
               <a
                 key={index}
@@ -215,7 +239,7 @@ const DesignOrderForm: React.FC = () => {
           value={formData.customDesignType}
           onChange={handleInputChange}
           placeholder="Укажите свой вариант"
-          className="w-full p-2 border rounded mt-2 mb-4"
+          className="w-full p-2 border rounded mt-2 mb-4 bg-[#222222] text-white border-none"
         />
       )}
 
@@ -224,8 +248,8 @@ const DesignOrderForm: React.FC = () => {
         name="designText"
         value={formData.designText}
         onChange={handleInputChange}
-        placeholder="Текст для дизайна"
-        className="w-full p-2 border rounded mb-4"
+        placeholder="Если вы хотите вставить текст дизайна, введите его"
+        className="w-full p-2 border rounded mb-4 bg-[#222222] text-white border-none"
       />
       {errors.designText && (
         <p className="text-red-500 text-sm mt-1">{errors.designText}</p>
@@ -236,8 +260,8 @@ const DesignOrderForm: React.FC = () => {
         name="color"
         value={formData.color}
         onChange={handleInputChange}
-        placeholder="Цвет"
-        className="w-full p-2 border rounded mb-4"
+        placeholder="Введите предпочтение цвета"
+        className="w-full p-2 border rounded mb-4 bg-[#222222] text-white border-none"
       />
       {errors.color && (
         <p className="text-red-500 text-sm mt-1">{errors.color}</p>
@@ -249,32 +273,33 @@ const DesignOrderForm: React.FC = () => {
         value={formData.designElements}
         onChange={handleInputChange}
         placeholder="Элементы дизайна (например, машина или персонаж)"
-        className="w-full p-2 border rounded mb-4"
+        className="w-full p-2 border rounded mb-4 bg-[#222222] text-white border-none"
       />
       {errors.designElements && (
         <p className="text-red-500 text-sm mt-1">{errors.designElements}</p>
       )}
 
-      <div className="flex mb-4">
+
+<div className="flex mb-4">
         <input
-          type="number"
+          type="text"
           name="width"
-          value={formData.width}
+          value={formData.width || ''}
           onChange={handleInputChange}
-          placeholder="Ширина"
-          className="w-1/2 p-2 border rounded mr-2"
+          placeholder="Ширину тома (px , sm , vh)"
+          className="w-1/2 p-2 border rounded mr-2 bg-[#222222] text-white border-none"
         />
         <input
-          type="number"
+          type="text"
           name="height"
-          value={formData.height}
+          value={formData.height || ''}
           onChange={handleInputChange}
-          placeholder="Высота"
-          className="w-1/2 p-2 border rounded"
+          placeholder="Введите высоту (px , sm , vh)"
+          className="w-1/2 p-2 border rounded bg-[#222222] text-white border-none"
         />
       </div>
       {errors.size && (
-        <p className="text-red-500 text-sm mt-1">{errors.size}</p>
+        <p className="text-red-500 text-sm mt-1 ">{errors.size}</p>
       )}
 
       <input
@@ -282,8 +307,8 @@ const DesignOrderForm: React.FC = () => {
         name="fileSize"
         value={formData.fileSize}
         onChange={handleInputChange}
-        placeholder="Размер файла (необязательно)"
-        className="w-full p-2 border rounded mb-4"
+        placeholder="Введите размер файла (МБ, ГБ, ТБ)  (Если это необязательно, вам не нужно его заполнять.)"
+        className="w-full p-2 border rounded mb-4 bg-[#222222] text-white border-none"
       />
 
       <textarea
@@ -291,7 +316,7 @@ const DesignOrderForm: React.FC = () => {
         value={formData.additionalInfo}
         onChange={handleInputChange}
         placeholder="Дополнительная информация или советы"
-        className="w-full p-2 border rounded mb-4"
+        className="w-full p-2 border rounded mb-4 bg-[#222222] text-white border-none"
         rows={4}
       />
       {errors.additionalInfo && (
@@ -303,8 +328,8 @@ const DesignOrderForm: React.FC = () => {
         name="telegramUsername"
         value={formData.telegramUsername}
         onChange={handleInputChange}
-        placeholder="Имя пользователя в Telegram"
-        className="w-full p-2 border rounded mb-4"
+        placeholder="Оставьте свой (username) для связи через Telegram"
+        className="w-full p-2 border rounded mb-4 bg-[#222222] text-white border-none"
       />
       {errors.telegramUsername && (
         <p className="text-red-500 text-sm mt-1">{errors.telegramUsername}</p>
@@ -312,7 +337,7 @@ const DesignOrderForm: React.FC = () => {
 
       <button
         type="submit"
-        className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300"
+        className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300 bg-[#E32879]"
       >
         Отправить заказ
       </button>
